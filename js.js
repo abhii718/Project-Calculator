@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const inputBox = document.getElementById("inputBox");
   const buttons = document.querySelectorAll("button");
-  const operators = ["+", "-", "*", "/"];
+  const operators = ["+", "-", "*", "/", "%"];
 
   buttons.forEach((button) => {
     button.addEventListener("click", handleClick);
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         break;
       case "=":
         try {
-          inputBox.value = new Function('return ' + currentInput)();
+          inputBox.value = new Function("return " + currentInput)();
         } catch (error) {
           inputBox.value = "E";
         }
@@ -30,19 +30,25 @@ document.addEventListener("DOMContentLoaded", function () {
           inputBox.value += buttonValue;
         }
         break;
-      case "%":
-        if (currentInput !== "" && !isOperator(currentInput.slice(-1))) {
-          inputBox.value += buttonValue;
-        }
-        break;
+
       default:
-        if ((currentInput !== "" || /\d/.test(buttonValue)) && !isOperator(currentInput.slice(-1)) && !isOperator(buttonValue)) {
+        // Check if the last character is not an operator or a dot
+        if (
+          (currentInput === "" && buttonValue === "-") || // Allow "-" at the beginning
+          ((currentInput !== "" || /\d/.test(buttonValue)) &&
+            (buttonValue !== "%" || /\d/.test(currentInput.slice(-1))) &&
+            (buttonValue !== "+" || /\d/.test(currentInput.slice(-1))) &&
+            (buttonValue !== "*" || /\d/.test(currentInput.slice(-1))) &&
+            (buttonValue !== "/" || /\d/.test(currentInput.slice(-1))) &&
+            (buttonValue !== "-" || /\d/.test(currentInput.slice(-1))) &&
+            buttonValue !== ".")
+        ) {
           inputBox.value += buttonValue;
         }
+
         break;
     }
   }
-
   function isOperator(value) {
     return operators.includes(value);
   }
