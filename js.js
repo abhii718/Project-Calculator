@@ -12,14 +12,44 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", handleClick);
   });
 
+  // Add keydown event listener to the document
+  document.addEventListener("keydown", handleKeyDown);
+
   // Function to handle button clicks
   function handleClick(event) {
     // Extract the button value and current input value
     const buttonValue = event.target.innerText;
+    handleInput(buttonValue);
+  }
+
+  // Function to handle key presses
+  function handleKeyDown(event) {
+    // Get the key value
+    const keyValue = event.key;
+
+    // Check if the key is a valid key for the calculator
+    if (isValidKey(keyValue)) {
+        if (keyValue === "Enter") {
+            // Handle the Enter key separately as it corresponds to "="
+            handleInput("=");
+        } else if (keyValue === "Backspace") {
+            // Handle the Backspace key separately
+            inputBox.value = inputBox.value.slice(0, -1); // Remove the last character from the input
+        } else {
+            // For other keys, handle the input normally
+            handleInput(keyValue);
+        }
+        event.preventDefault(); // Prevent the default action (e.g., scrolling)
+    }
+}
+
+  // Function to handle both button clicks and key presses
+  function handleInput(value) {
+    // Extract the current input value
     const currentInput = inputBox.value;
 
-    // Switch statement to handle different button actions
-    switch (buttonValue) {
+    // Switch statement to handle different input actions
+    switch (value) {
       case "AC":
         // Clear the input box if AC (All Clear) button is clicked
         inputBox.value = "";
@@ -40,15 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
       case ".":
         // Allow only one decimal point in the input
         if (!currentInput.includes(".")) {
-          inputBox.value += buttonValue;
+          inputBox.value += value;
         }
         break;
       default:
         // Check if the input is empty or only contains zero
         if (currentInput === "" || currentInput === "0") {
           // Allow only one zero at the beginning
-          if (buttonValue !== "0" && buttonValue !== ".") {
-            inputBox.value += buttonValue;
+          if (value !== "0" && value !== ".") {
+            inputBox.value += value;
           }
         } else {
           // Check if the input length is less than or equal to 12 characters
@@ -56,23 +86,23 @@ document.addEventListener("DOMContentLoaded", function () {
             // Check if the input bar contains a single zero
             if (currentInput === "0") {
               // Allow only decimal point to be added after zero
-              if (buttonValue === ".") {
-                inputBox.value += buttonValue;
+              if (value === ".") {
+                inputBox.value += value;
               }
             } else {
               // Check if the clicked button is a digit, operator, or decimal point
-              if (/[\d\+\-\*\/\%\.]/.test(buttonValue)) {
+              if (/[\d\+\-\*\/\%\.]/.test(value)) {
                 // Check if the last character is not an operator or a dot
                 if (
-                  (currentInput !== "" || /\d/.test(buttonValue)) &&
-                  (buttonValue !== "%" || /\d/.test(currentInput.slice(-1))) &&
-                  (buttonValue !== "+" || /\d/.test(currentInput.slice(-1))) &&
-                  (buttonValue !== "*" || /\d/.test(currentInput.slice(-1))) &&
-                  (buttonValue !== "/" || /\d/.test(currentInput.slice(-1))) &&
-                  (buttonValue !== "-" || /\d/.test(currentInput.slice(-1))) &&
-                  buttonValue !== "."
+                  (currentInput !== "" || /\d/.test(value)) &&
+                  (value !== "%" || /\d/.test(currentInput.slice(-1))) &&
+                  (value !== "+" || /\d/.test(currentInput.slice(-1))) &&
+                  (value !== "*" || /\d/.test(currentInput.slice(-1))) &&
+                  (value !== "/" || /\d/.test(currentInput.slice(-1))) &&
+                  (value !== "-" || /\d/.test(currentInput.slice(-1))) &&
+                  value !== "."
                 ) {
-                  inputBox.value += buttonValue; // Add the button value to the input
+                  inputBox.value += value; // Add the button value to the input
                 }
               }
             }
@@ -85,6 +115,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to check if a value is an operator
   function isOperator(value) {
     return operators.includes(value);
+  }
+
+  // Function to check if a key is a valid key for the calculator
+  function isValidKey(key) {
+    // Allow digits, operators, decimal point, Backspace, Enter, and Escape keys
+    return /[\d+\-*/%.]|Backspace|Enter|Escape/i.test(key);
   }
 
   // Event listener to prevent typing invalid characters into the input box
