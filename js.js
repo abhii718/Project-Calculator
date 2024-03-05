@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
       case "=":
         // Evaluate and display the result when = button is clicked
         try {
-          inputBox.value = new Function("return " + currentInput)();
+          const result = new Function("return " + currentInput)();
+          inputBox.value = isFinite(result) ? result : "∞"; // Display infinity symbol for infinite result
         } catch (error) {
           inputBox.value = "E"; // Display "E" for errors
         }
@@ -43,18 +44,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         break;
       default:
-        // Check if the last character is not an operator or a dot
-        if (
-          (currentInput === "" && buttonValue === "-") || // Allow "-" at the beginning
-          ((currentInput !== "" || /\d/.test(buttonValue)) &&
-            (buttonValue !== "%" || /\d/.test(currentInput.slice(-1))) &&
-            (buttonValue !== "+" || /\d/.test(currentInput.slice(-1))) &&
-            (buttonValue !== "*" || /\d/.test(currentInput.slice(-1))) &&
-            (buttonValue !== "/" || /\d/.test(currentInput.slice(-1))) &&
-            (buttonValue !== "-" || /\d/.test(currentInput.slice(-1))) &&
-            buttonValue !== ".")
-        ) {
-          inputBox.value += buttonValue; // Add the button value to the input
+        // Check if the input is empty or only contains zero
+        if (currentInput === "" || currentInput === "0") {
+          // Allow only one zero at the beginning
+          if (buttonValue !== "0" && buttonValue !== ".") {
+            inputBox.value += buttonValue;
+          }
+        } else {
+          // Check if the input length is less than or equal to 12 characters
+          if (currentInput.length <= 12) {
+            // Check if the input bar contains a single zero
+            if (currentInput === "0") {
+              // Allow only decimal point to be added after zero
+              if (buttonValue === ".") {
+                inputBox.value += buttonValue;
+              }
+            } else {
+              // Check if the clicked button is a digit, operator, or decimal point
+              if (/[\d\+\-\*\/\%\.]/.test(buttonValue)) {
+                // Check if the last character is not an operator or a dot
+                if (
+                  (currentInput !== "" || /\d/.test(buttonValue)) &&
+                  (buttonValue !== "%" || /\d/.test(currentInput.slice(-1))) &&
+                  (buttonValue !== "+" || /\d/.test(currentInput.slice(-1))) &&
+                  (buttonValue !== "*" || /\d/.test(currentInput.slice(-1))) &&
+                  (buttonValue !== "/" || /\d/.test(currentInput.slice(-1))) &&
+                  (buttonValue !== "-" || /\d/.test(currentInput.slice(-1))) &&
+                  buttonValue !== "."
+                ) {
+                  inputBox.value += buttonValue; // Add the button value to the input
+                }
+              }
+            }
+          }
         }
         break;
     }
@@ -64,5 +86,14 @@ document.addEventListener("DOMContentLoaded", function () {
   function isOperator(value) {
     return operators.includes(value);
   }
-});
 
+  // Event listener to prevent typing invalid characters into the input box
+  inputBox.addEventListener("keypress", function (event) {
+    const allowedKeys = /[0-9+\-*/.%]/; // Define the allowed characters using a regular expression
+
+    // Check if the pressed key is not allowed
+    if (!allowedKeys.test(event.key)) {
+      event.preventDefault(); // Prevent the default action (typing)
+    }
+  });
+});
